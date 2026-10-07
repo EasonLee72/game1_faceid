@@ -1,0 +1,284 @@
+.manage {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.manage-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.manage-head h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.lead,
+.note {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.note code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.error {
+  margin: 0;
+  padding: 12px 16px;
+  border: 3px solid #b3123f;
+  border-radius: var(--radius-control);
+  background: #fff0f4;
+  color: #8a0d30;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  translate: -50% 0;
+  margin: 0;
+  padding: 10px 24px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--gold);
+  box-shadow: 0 4px 0 var(--ink);
+  z-index: 10;
+}
+
+.toast:empty {
+  display: none;
+}
+
+/* ── 列表 ─────────────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 24px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: var(--mask);
+  transition: border-color var(--press);
+}
+
+.card:hover img {
+  border-color: var(--pink);
+}
+
+.card:focus-visible {
+  outline: none;
+}
+
+.card:focus-visible img {
+  outline: 3px solid var(--pink);
+  outline-offset: 3px;
+}
+
+.card span {
+  overflow-wrap: anywhere;
+}
+
+/* ── 編輯 ─────────────────────────────── */
+
+.editor {
+  --box: min(68dvh, calc(100vw - 32px), 560px);
+  display: grid;
+  gap: 24px;
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .editor {
+    grid-template-columns: var(--box) 280px;
+    gap: 48px;
+    align-items: center;
+  }
+}
+
+.crop-box {
+  position: relative;
+  width: var(--box);
+  aspect-ratio: 1;
+  border: 4px solid var(--ink);
+  border-radius: var(--radius-stage);
+  background: var(--mask);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 18px 36px rgb(27 23 64 / 0.22);
+}
+
+.crop-box.is-dragging {
+  cursor: grabbing;
+}
+
+.crop-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.crosshair {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.crosshair path,
+.crosshair circle {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.crosshair .guide {
+  stroke: rgb(255 255 255 / 0.45);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+}
+
+.crosshair .reticle-shadow {
+  stroke: var(--ink);
+  stroke-width: 5;
+}
+
+.crosshair .reticle {
+  stroke: var(--gold);
+  stroke-width: 2.5;
+}
+
+.editor-side {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.editor-side h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 1.125rem;
+}
+
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.range-row input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  accent-color: var(--pink);
+  cursor: pointer;
+}
+
+.range-row output {
+  min-width: 4ch;
+  font-family: var(--font-num);
+  font-weight: 600;
+  font-size: 1.125rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.actions button {
+  flex: 1;
+  min-height: 52px;
+  padding: 0 24px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--ink);
+  transition:
+    transform var(--press),
+    box-shadow var(--press);
+}
+
+.btn-primary {
+  background: var(--pink);
+}
+
+.btn-secondary {
+  background: var(--surface);
+}
+
+.actions button:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.actions button:disabled {
+  opacity: 0.45;
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card img,
+  .actions button {
+    transition: none;
+  }
+}

@@ -1,0 +1,48 @@
+:root {
+  --bg: #eef0ff;
+  --ink: #1b1740;
+  --mask: #2a2357;
+  --pink: #ff4f8b;
+  --gold: #ffc23d;
+  --muted: #5a5680;
+  --surface: #ffffff;
+
+  --font-zh: 'Huninn', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+  --font-num: 'Fredoka', var(--font-zh);
+
+  --radius-stage: 28px;
+  --radius-control: 16px;
+  --press: 120ms ease-out;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-zh);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 3px solid var(--pink);
+  outline-offset: 3px;
+}
+
+a {
+  color: var(--ink);
+  text-underline-offset: 3px;
+}

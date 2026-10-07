@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>猜猜我是誰</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Huninn&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="app">
+      <h1 class="title">猜猜我是誰</h1>
+
+      <section class="play" id="play" hidden>
+        <div class="stage" id="stage">
+          <img class="photo" id="photo" alt="" draggable="false" />
+          <svg class="hold-ring" viewBox="0 0 100 100" aria-hidden="true">
+            <path
+              id="ring"
+              pathLength="100"
+              d="M50 1.5H94.5A4 4 0 0 1 98.5 5.5V94.5A4 4 0 0 1 94.5 98.5H5.5A4 4 0 0 1 1.5 94.5V5.5A4 4 0 0 1 5.5 1.5Z"
+            />
+          </svg>
+          <p class="answer" id="answer" hidden></p>
+        </div>
+        <p class="status">
+          <span id="phase" aria-live="polite"></span>
+          <span class="pct" id="pct" aria-hidden="true"></span>
+        </p>
+      </section>
+
+      <section class="controls" id="controls" hidden>
+        <p class="counter" id="counter"></p>
+        <div class="field">
+          <label for="speed">揭開速度</label>
+          <div class="range-row">
+            <input type="range" id="speed" min="3" max="60" step="1" value="15" />
+            <output for="speed" id="speed-value">15 秒</output>
+          </div>
+          <p class="help">按住多久會全部揭開，往右越慢</p>
+        </div>
+        <div class="actions">
+          <button type="button" class="restart" id="restart">重新開始</button>
+          <button type="button" class="next" id="next" disabled>下一題</button>
+        </div>
+        <a class="manage-link" href="/manage.html">管理照片</a>
+      </section>
+
+      <section class="empty" id="empty" hidden>
+        <h2>還沒有照片</h2>
+        <p>把名人大頭照放進專案的 <code>face/</code> 資料夾，再重新整理這個頁面。</p>
+        <ul>
+          <li>檔名就是答案，例如 <code>黃仁勳.jpg</code>、<code>川普.png</code></li>
+          <li>先裁成正方形，讓鼻子剛好在正中央</li>
+          <li>支援 jpg、png、webp</li>
+        </ul>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

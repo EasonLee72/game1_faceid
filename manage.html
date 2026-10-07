@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>管理照片｜猜猜我是誰</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Huninn&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="manage">
+      <header class="manage-head">
+        <h1>管理照片</h1>
+        <a href="/">回到遊戲</a>
+      </header>
+      <p class="toast" id="toast" role="status" aria-live="polite"></p>
+
+      <section id="list-view">
+        <p class="lead">點一張照片來調整裁切，讓鼻子對準正中央。</p>
+        <ul class="grid" id="grid"></ul>
+        <p class="note" id="list-empty" hidden>
+          <code>face/</code> 資料夾裡還沒有照片。放進去之後重新整理這個頁面。
+        </p>
+        <p class="error" id="list-error" role="alert" hidden></p>
+      </section>
+
+      <section class="editor" id="edit-view" hidden>
+        <div
+          class="crop-box"
+          id="crop-box"
+          tabindex="0"
+          role="application"
+          aria-label="裁切範圍：拖曳或用方向鍵移動照片，加號減號縮放"
+        >
+          <img class="crop-img" id="crop-img" alt="" draggable="false" />
+          <svg class="crosshair" viewBox="0 0 100 100" aria-hidden="true">
+            <path class="guide" d="M50 0V100M0 50H100" />
+            <circle class="reticle-shadow" cx="50" cy="50" r="4" />
+            <circle class="reticle" cx="50" cy="50" r="4" />
+            <path class="reticle-shadow" d="M50 40V46M50 54V60M40 50H46M54 50H60" />
+            <path class="reticle" d="M50 40V46M50 54V60M40 50H46M54 50H60" />
+          </svg>
+        </div>
+
+        <div class="editor-side">
+          <h2 id="edit-name"></h2>
+          <div class="field">
+            <label for="zoom">縮放</label>
+            <div class="range-row">
+              <input type="range" id="zoom" min="1" max="5" step="0.01" value="1" />
+              <output for="zoom" id="zoom-value">1.0×</output>
+            </div>
+          </div>
+          <p class="help">
+            拖曳照片，讓鼻子對準金色準星，再調整大小。方向鍵微調 1px，按住 Shift 一次 10px。
+          </p>
+          <p class="help" id="out-info"></p>
+          <p class="error" id="edit-error" role="alert" hidden></p>
+          <div class="actions">
+            <button type="button" class="btn-secondary" id="discard">放棄</button>
+            <button type="button" class="btn-primary" id="save">儲存</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/manage.ts"></script>
+  </body>
+</html>
