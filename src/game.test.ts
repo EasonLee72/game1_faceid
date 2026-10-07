@@ -8,7 +8,7 @@ const faces: Face[] = ['甲', '乙', '丙'].map((name) => ({ url: `/face/${name}
 const zero = () => 0;
 const hold = (ms: number) => ({ dtMs: ms, pressed: true, durationSec: 1 });
 
-/** 揭開並公布答案（揭露 1 秒 + 按住 3 秒） */
+/** 揭開並公布答案（揭露 1 秒 + 按住到門檻） */
 function answer(game: ReturnType<typeof createGame>) {
   game.tick(hold(1000));
   game.tick(hold(HOLD_TO_ANSWER_MS));
@@ -73,6 +73,33 @@ describe('next', () => {
   });
 });
 
+describe('固定順序（ans_order.md）', () => {
+  const fixed = () => createGame(faces, zero, { fixedOrder: true });
+
+  it('不洗牌，照傳入順序出題', () => {
+    const game = fixed();
+    expect(game.view().face.name).toBe('甲');
+    answer(game);
+    game.next();
+    expect(game.view().face.name).toBe('乙');
+  });
+
+  it('再玩一輪時從第 1 題、同樣順序重來', () => {
+    const game = fixed();
+    for (let i = 0; i < 3; i++) {
+      answer(game);
+      game.next();
+    }
+    expect(game.view()).toMatchObject({ index: 0, phase: 'idle' });
+    expect(game.view().face.name).toBe('甲');
+  });
+
+  it('允許同一張照片出現兩次', () => {
+    const game = createGame([faces[0]!, faces[0]!], zero, { fixedOrder: true });
+    expect(game.view().total).toBe(2);
+  });
+});
+
 describe('restartRound', () => {
   it('揭露途中：恢復原始遮罩，題目不變', () => {
     const game = createGame(faces, zero);
@@ -92,7 +119,7 @@ describe('restartRound', () => {
 });
 
 describe('statusText', () => {
-  it('依階段給出提示，3 秒文字來自常數', () => {
+  it('依階段給出提示，秒數文字來自常數', () => {
     const game = createGame(faces, zero);
     expect(statusText(game.view())).toBe('按住照片或空白鍵來揭開');
     game.tick(hold(500));

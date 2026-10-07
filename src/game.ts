@@ -16,17 +16,29 @@ export interface GameView {
 export interface Game {
   /** 推進一幀；回傳畫面是否需要更新 */
   tick(input: StepInput): boolean;
-  /** 答案公布後才有效：前往下一題，最後一題則重新洗牌再玩一輪 */
+  /** 答案公布後才有效：前往下一題，最後一題則從頭再玩一輪（非固定順序時重新洗牌） */
   next(): void;
   /** 恢復這題最原始的遮罩 */
   restartRound(): void;
+  /** 有人提前猜中：直接全部揭開並公布答案 */
+  revealAnswer(): void;
   view(): GameView;
 }
 
-export function createGame(faces: readonly Face[], random: () => number = Math.random): Game {
+export interface GameOptions {
+  /** true = 照傳入順序出題（ans_order.md），每輪都一樣；false = 每輪洗牌 */
+  readonly fixedOrder?: boolean;
+}
+
+export function createGame(
+  faces: readonly Face[],
+  random: () => number = Math.random,
+  { fixedOrder = false }: GameOptions = {},
+): Game {
   if (faces.length === 0) throw new Error('createGame: 至少需要一張照片');
 
-  let deck = shuffle(faces, random);
+  const newDeck = () => (fixedOrder ? [...faces] : shuffle(faces, random));
+  let deck = newDeck();
   let index = 0;
   let reveal = initialReveal;
 
@@ -39,7 +51,7 @@ export function createGame(faces: readonly Face[], random: () => number = Math.r
     next() {
       if (!reveal.answered) return;
       if (index === deck.length - 1) {
-        deck = shuffle(faces, random);
+        deck = newDeck();
         index = 0;
       } else {
         index++;
@@ -48,6 +60,9 @@ export function createGame(faces: readonly Face[], random: () => number = Math.r
     },
     restartRound() {
       reveal = initialReveal;
+    },
+    revealAnswer() {
+      reveal = { progress: 1, holdMs: HOLD_TO_ANSWER_MS, answered: true };
     },
     view() {
       return {

@@ -1,0 +1,47 @@
+.rules {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.rules-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.rules-head h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+/* 可能直接投影給玩家看，字要大 */
+.rule-list {
+  display: grid;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 1.5;
+  /* 換行時平均分配，避免最後一行只剩一個字 */
+  text-wrap: balance;
+}
+
+/* 重點規則：跟答案徽章同一套金底粗框 */
+.rule-key {
+  justify-self: start;
+  padding: 16px 28px;
+  border: 4px solid var(--ink);
+  border-radius: var(--radius-stage);
+  background: var(--gold);
+  box-shadow: 0 6px 0 var(--ink);
+}
+
+.rule-key strong {
+  font-weight: inherit;
+}

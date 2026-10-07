@@ -1,5 +1,5 @@
 /** 完全揭露後，需持續按住多久才公布答案 */
-export const HOLD_TO_ANSWER_MS = 3000;
+export const HOLD_TO_ANSWER_MS = 1500;
 
 export interface RevealState {
   /** 揭露比例 0..1（1 = 圓已擴張到舞台四角） */

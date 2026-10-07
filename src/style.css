@@ -81,6 +81,30 @@
   pointer-events: none;
 }
 
+/* 按住、圓還在擴大時，整個舞台外框閃爍發光 */
+.stage.is-revealing {
+  /* 每 0.36 秒切換一次，約每秒 1.4 次閃爍，低於 WCAG 每秒 3 次的上限 */
+  animation: frame-flash 360ms ease-in-out infinite alternate;
+}
+
+@keyframes frame-flash {
+  from {
+    border-color: var(--ink);
+    box-shadow:
+      0 0 0 4px rgb(255 194 61 / 0.35),
+      0 0 24px 6px rgb(255 194 61 / 0.35),
+      0 8px 16px rgb(27 23 64 / 0.2);
+  }
+  to {
+    border-color: var(--gold);
+    box-shadow:
+      0 0 0 8px var(--gold),
+      0 0 48px 18px rgb(255 194 61 / 0.95),
+      0 0 96px 40px rgb(255 79 139 / 0.5),
+      0 8px 16px rgb(27 23 64 / 0.2);
+  }
+}
+
 .hold-ring {
   position: absolute;
   inset: 0;
@@ -196,6 +220,7 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
@@ -203,10 +228,15 @@
   flex: 1;
 }
 
+/* 重新開始、看答案並排，下一題獨佔一列 */
+.actions .next {
+  flex-basis: 100%;
+}
+
 .next,
 .restart {
   min-height: 52px;
-  padding: 0 24px;
+  padding: 0 16px;
   border: 3px solid var(--ink);
   border-radius: var(--radius-control);
   background: var(--pink);
@@ -225,12 +255,13 @@
 }
 
 .next:active:not(:disabled),
-.restart:active {
+.restart:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow: 0 2px 0 var(--ink);
 }
 
-.next:disabled {
+.next:disabled,
+.restart:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -265,6 +296,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* 減少動態效果：不閃，改成固定亮著的金框 */
+  .stage.is-revealing {
+    animation: none;
+    border-color: var(--gold);
+    box-shadow:
+      0 0 0 6px var(--gold),
+      0 0 40px 12px rgb(255 194 61 / 0.8);
+  }
   .answer {
     animation: none;
     transform: rotate(-2deg);
@@ -276,8 +315,12 @@
   }
 }
 
-.manage-link {
-  justify-self: start;
-  color: var(--muted);
+.page-links {
+  display: flex;
+  gap: 24px;
   font-size: 0.9375rem;
+}
+
+.page-links a {
+  color: var(--muted);
 }

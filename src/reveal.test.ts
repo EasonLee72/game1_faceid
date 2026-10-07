@@ -26,7 +26,7 @@ describe('step', () => {
     expect(s.progress).toBe(1);
   });
 
-  it('到達 100% 時還按著：該幀剩下的時間直接計入 3 秒', () => {
+  it('到達 100% 時還按著：該幀剩下的時間直接計入 hold', () => {
     // 0.95 → 1 需 500ms，剩 500ms 計入 hold
     const s = step(at(0.95), { dtMs: 1000, pressed: true, durationSec: 10 });
     expect(s.progress).toBe(1);
@@ -34,17 +34,21 @@ describe('step', () => {
   });
 
   it('完全揭露後按住會累計 hold', () => {
-    const s = step(at(1, 1000), { dtMs: 500, pressed: true, durationSec: 10 });
-    expect(s.holdMs).toBe(1500);
+    const s = step(at(1, 500), { dtMs: 500, pressed: true, durationSec: 10 });
+    expect(s.holdMs).toBe(1000);
     expect(s.answered).toBe(false);
   });
 
   it('完全揭露後放開，hold 歸零', () => {
-    const s = step(at(1, 2500), { dtMs: 16, pressed: false, durationSec: 10 });
+    const s = step(at(1, 1000), { dtMs: 16, pressed: false, durationSec: 10 });
     expect(s).toEqual(at(1, 0));
   });
 
-  it('hold 達 3 秒即公布答案', () => {
+  it('完全揭露後再按住 1.5 秒公布答案', () => {
+    expect(HOLD_TO_ANSWER_MS).toBe(1500);
+  });
+
+  it('hold 達門檻即公布答案', () => {
     const s = step(at(1, HOLD_TO_ANSWER_MS - 10), { dtMs: 16, pressed: true, durationSec: 10 });
     expect(s.answered).toBe(true);
   });

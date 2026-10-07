@@ -20,6 +20,19 @@
       <p class="toast" id="toast" role="status" aria-live="polite"></p>
 
       <section id="list-view">
+        <div class="order-panel">
+          <div>
+            <h2>答案順序</h2>
+            <p class="help">
+              把所有照片隨機排好，寫進專案的
+              <code>ans_order.md</code>，遊戲就照這個順序出題，主持人照著對答案。
+              想改回隨機出題，清空這個檔案再重新整理遊戲頁。
+            </p>
+            <p class="order-status" id="order-status" role="status"></p>
+            <p class="order-warning" id="order-warning" hidden></p>
+          </div>
+          <button type="button" class="btn-secondary" id="gen-order">產生答案順序</button>
+        </div>
         <p class="lead">點一張照片來調整裁切，讓鼻子對準正中央。</p>
         <ul class="grid" id="grid"></ul>
         <p class="note" id="list-empty" hidden>

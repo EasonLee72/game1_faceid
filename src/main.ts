@@ -1,5 +1,6 @@
 import './base.css';
 import './style.css';
+import { parseAnsOrder } from './ansOrder';
 import { nameFromPath, type Face } from './faces';
 import { createGame, statusText, type Game } from './game';
 import { revealRadiusPct } from './geometry';
@@ -28,6 +29,7 @@ const speed = $<HTMLInputElement>('speed');
 const speedValue = $<HTMLOutputElement>('speed-value');
 const restart = $<HTMLButtonElement>('restart');
 const next = $<HTMLButtonElement>('next');
+const reveal = $<HTMLButtonElement>('reveal');
 
 const SPEED_KEY = 'faceid.durationSec';
 
@@ -40,9 +42,27 @@ let shownStatus = '';
 if (faces.length === 0) {
   $('empty').hidden = false;
 } else {
+  void start();
+}
+
+/** 讀 ans_order.md：有清單就照它出題，否則（空檔、讀不到）隨機洗牌 */
+async function loadOrder(): Promise<Face[] | null> {
+  let markdown = '';
+  try {
+    const res = await fetch('/api/ans-order');
+    if (res.ok) markdown = ((await res.json()) as { markdown: string }).markdown;
+  } catch {
+    // 沒有 dev server（例如 build 後的靜態檔）就用隨機出題
+  }
+  // 檔案狀態與對不上的警告只在管理頁顯示，遊戲畫面不洩漏
+  return parseAnsOrder(markdown, faces).order;
+}
+
+async function start() {
+  const order = await loadOrder();
   $('play').hidden = false;
   $('controls').hidden = false;
-  const game = createGame(faces);
+  const game = order ? createGame(order, Math.random, { fixedOrder: true }) : createGame(faces);
   restoreSpeed();
   bindInput(game);
   render(game);
@@ -53,7 +73,9 @@ if (faces.length === 0) {
     last = now;
     const pressed = pointerHeld || keyHeld;
     const changed = game.tick({ dtMs, pressed, durationSec: Number(speed.value) });
-    stage.classList.toggle('is-pressed', pressed && game.view().phase !== 'answered');
+    const { phase } = game.view();
+    stage.classList.toggle('is-pressed', pressed && phase !== 'answered');
+    stage.classList.toggle('is-revealing', pressed && phase === 'revealing');
     if (changed) render(game);
     requestAnimationFrame(loop);
   };
@@ -102,6 +124,10 @@ function bindInput(game: Game) {
     game.restartRound();
     render(game);
   });
+  reveal.addEventListener('click', () => {
+    game.revealAnswer();
+    render(game);
+  });
   next.addEventListener('click', () => {
     game.next();
     render(game);
@@ -134,6 +160,7 @@ function render(game: Game) {
   ring.style.strokeDasharray = `${(v.reveal.holdMs / HOLD_TO_ANSWER_MS) * 100} 100`;
   answer.hidden = v.phase !== 'answered';
   next.disabled = v.phase !== 'answered';
+  reveal.disabled = v.phase === 'answered';
   pct.textContent = v.phase === 'revealing' ? `${Math.floor(v.reveal.progress * 100)}%` : '';
 
   // 只在文字改變時寫入，避免 aria-live 每幀播報

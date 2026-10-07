@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -10,11 +10,13 @@ import { BACKUP_DIR } from './faceFiles';
 let dir: string;
 let server: Server;
 let base: string;
+let ansPath: string;
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), 'faceid-api-'));
   await writeFile(join(dir, '甲.jpg'), 'old');
-  const api = createFaceApi(dir);
+  ansPath = join(dir, 'ans_order.md');
+  const api = createFaceApi(dir, ansPath);
   server = createServer((req, res) =>
     api(req, res, () => {
       res.statusCode = 418;
@@ -72,6 +74,70 @@ describe('PUT /api/faces/:file', () => {
     const res = await put('甲.jpg', '');
     expect(res.status).toBe(400);
     expect(await readFile(join(dir, '甲.jpg'), 'utf8')).toBe('old');
+  });
+});
+
+const generate = (query = '') => fetch(`${base}/api/ans-order${query}`, { method: 'POST' });
+
+describe('GET /api/ans-order', () => {
+  it('檔案不存在時回傳空字串', async () => {
+    const res = await fetch(`${base}/api/ans-order`);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ markdown: '', updatedMs: null });
+  });
+
+  it('回傳檔案內容與最後更新時間', async () => {
+    await writeFile(ansPath, '1. 甲\n');
+    const { mtimeMs } = await stat(ansPath);
+    expect(await (await fetch(`${base}/api/ans-order`)).json()).toEqual({
+      markdown: '1. 甲\n',
+      updatedMs: mtimeMs,
+    });
+  });
+});
+
+describe('POST /api/ans-order', () => {
+  beforeEach(() => writeFile(join(dir, '乙.png'), 'x'));
+
+  const listed = (md: string) => md.match(/^\d+\. .+$/gm)?.map((l) => l.replace(/^\d+\. /, ''));
+
+  it('檔案不存在：以所有照片的檔名寫出有序清單', async () => {
+    const res = await generate();
+    expect(res.status).toBe(200);
+    const md = await readFile(ansPath, 'utf8');
+    expect(listed(md)?.sort()).toEqual(['乙.png', '甲.jpg']);
+    expect(md).toMatch(/^1\. /m);
+    expect(md).toMatch(/^2\. /m);
+    expect(await res.json()).toEqual({ markdown: md, updatedMs: (await stat(ansPath)).mtimeMs });
+  });
+
+  it('只有空白的檔案視為空的，直接寫入', async () => {
+    await writeFile(ansPath, '  \n');
+    expect((await generate()).status).toBe(200);
+    expect(listed(await readFile(ansPath, 'utf8'))).toHaveLength(2);
+  });
+
+  it('已有內容且沒指定覆蓋：回 409，不動檔案', async () => {
+    await writeFile(ansPath, '1. 甲\n');
+    const res = await generate();
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toMatch(/已經有內容/);
+    expect(await readFile(ansPath, 'utf8')).toBe('1. 甲\n');
+  });
+
+  it('指定 overwrite=1 時覆蓋', async () => {
+    await writeFile(ansPath, '1. 甲\n');
+    expect((await generate('?overwrite=1')).status).toBe(200);
+    expect(listed(await readFile(ansPath, 'utf8'))).toHaveLength(2);
+  });
+
+  it('沒有照片時回 400，不建立檔案', async () => {
+    await rm(join(dir, '甲.jpg'));
+    await rm(join(dir, '乙.png'));
+    const res = await generate();
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/還沒有照片/);
+    await expect(readFile(ansPath, 'utf8')).rejects.toThrow();
   });
 });
 

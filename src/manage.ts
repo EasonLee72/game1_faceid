@@ -1,5 +1,6 @@
 import './base.css';
 import './manage.css';
+import { ansOrderStatus, ansOrderWarning, parseAnsOrder } from './ansOrder';
 import { cropRect, initialView, outputSize, panBy, zoomTo, type CropView, type Size } from './crop';
 import { mimeOf } from './faces';
 
@@ -26,6 +27,9 @@ const editError = $('edit-error');
 const discard = $<HTMLButtonElement>('discard');
 const save = $<HTMLButtonElement>('save');
 const toast = $('toast');
+const genOrder = $<HTMLButtonElement>('gen-order');
+const orderStatus = $('order-status');
+const orderWarning = $('order-warning');
 
 const faceUrl = (f: FaceEntry) => `/face/${encodeURIComponent(f.file)}?v=${f.mtimeMs}`;
 
@@ -246,4 +250,54 @@ function showToast(message: string) {
   toastTimer = window.setTimeout(() => (toast.textContent = ''), 4000);
 }
 
-void loadList();
+// ── 答案順序 ──────────────────────────────────
+
+interface AnsOrderFile {
+  readonly markdown: string;
+  readonly updatedMs: number | null;
+}
+
+function renderOrder({ markdown, updatedMs }: AnsOrderFile) {
+  const parsed = parseAnsOrder(
+    markdown,
+    faces.map((f) => ({ url: faceUrl(f), name: f.name })),
+  );
+  orderStatus.textContent = ansOrderStatus(updatedMs, parsed);
+  const warning = ansOrderWarning(parsed);
+  orderWarning.textContent = warning;
+  orderWarning.hidden = warning === '';
+}
+
+async function loadOrder() {
+  try {
+    const res = await fetch('/api/ans-order');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    renderOrder((await res.json()) as AnsOrderFile);
+  } catch (err) {
+    orderStatus.textContent = `讀不到 ans_order.md 的狀態（${String(err)}）`;
+  }
+}
+
+const postOrder = (overwrite: boolean) =>
+  fetch(`/api/ans-order${overwrite ? '?overwrite=1' : ''}`, { method: 'POST' });
+
+genOrder.addEventListener('click', async () => {
+  genOrder.disabled = true;
+  try {
+    let res = await postOrder(false);
+    if (res.status === 409) {
+      if (!confirm('ans_order.md 已經有排好的順序，要用新的隨機順序覆蓋嗎？')) return;
+      res = await postOrder(true);
+    }
+    const body = (await res.json()) as Partial<AnsOrderFile> & { error?: string };
+    if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+    renderOrder(body as AnsOrderFile);
+    showToast('已產生答案順序。重新整理遊戲頁就會照這個順序出題');
+  } catch (err) {
+    showToast(`產生答案順序失敗：${err instanceof Error ? err.message : String(err)}`);
+  } finally {
+    genOrder.disabled = false;
+  }
+});
+
+void loadList().then(loadOrder);

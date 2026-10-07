@@ -58,6 +58,77 @@
   display: none;
 }
 
+/* ── 答案順序 ─────────────────────────── */
+
+.order-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin: 16px 0 32px;
+  padding: 16px 20px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+.order-panel > div {
+  flex: 1 1 320px;
+}
+
+.order-panel h2 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.order-panel code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.order-status {
+  margin: 8px 0 0;
+  font-weight: 600;
+}
+
+.order-warning {
+  margin: 8px 0 0;
+  padding: 10px 14px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: #fff3d1;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.order-panel button {
+  min-height: 48px;
+  padding: 0 20px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.0625rem;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--ink);
+  transition:
+    transform var(--press),
+    box-shadow var(--press);
+}
+
+.order-panel button:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.order-panel button:disabled {
+  opacity: 0.45;
+  cursor: progress;
+}
+
 /* ── 列表 ─────────────────────────────── */
 
 .grid {
@@ -278,6 +349,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card img,
+  .order-panel button,
   .actions button {
     transition: none;
   }
